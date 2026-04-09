@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="theme-color" content="#2A75BB"/>
+<title>PokeScan Pro</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;background:#eeede8;color:#1a1a1a;min-height:100vh}
+.app{max-width:480px;margin:0 auto;background:#eeede8;min-height:100vh;padding-bottom:80px}
+.header{background:#2A75BB;padding:14px 16px 12px;display:-ms-flexbox;display:flex;-ms-flex-align:center;align-items:center;gap:12px;position:sticky;top:0;z-index:100}
+.poke-ball{width:40px;height:40px;border-radius:50%;background:#FFCB05;border:3px solid rgba(255,255,255,0.5);display:-ms-flexbox;display:flex;-ms-flex-align:center;align-items:center;justify-content:center;-ms-flex-negative:0;flex-shrink:0}
+.header-title{color:#fff;font-size:17px;font-weight:600}
+.header-sub{color:rgba(255,255,255,0.8);font-size:12px;margin-top:1px}
+.tab-bar{display:-ms-flexbox;display:flex;background:#fff;border-bottom:1px solid rgba(0,0,0,0.12);position:sticky;top:66px;z-index:99}
+.tab{-ms-flex:1;flex:1;padding:12px 8px;text-align:center;font-size:12px;font-weight:500;color:#666660;cursor:pointer;border:none;background:transparent;border-bottom:3px solid transparent}
+.tab.active{color:#2A75BB;border-bottom:3px solid #2A75BB}
+.view{padding:12px;display:none}
+.view.active{display:block}
+.card{background:#fff;border-radius:12px;padding:14px;margin-bottom:12px;border:1px solid rgba(0,0,0,0.1)}
+.cam-zone{border:2px dashed rgba(0,0,0,0.22);border-radius:12px;padding:36px 16px;text-align:center;cursor:pointer;background:#fff;margin-bottom:12px}
+.cam-icon{width:52px;height:52px;border-radius:50%;background:#e6f1fb;display:-ms-flexbox;display:flex;-ms-flex-align:center;align-items:center;justify-content:center;margin:0 auto 12px}
+.cam-title{font-size:16px;font-weight:500;margin-bottom:6px}
+.cam-sub{font-size:13px;color:#666660;line-height:1.5}
+.prev-img{width:100%;max-height:300px;object-fit:contain;border-radius:8px;display:block;margin-bottom:12px;background:#f5f5f3}
+.btn{width:100%;padding:14px;font-size:15px;font-weight:600;border:none;border-radius:12px;cursor:pointer;margin-top:8px;display:block;text-align:center}
+.btn-blue{background:#2A75BB;color:#fff}
+.btn-orange{background:#e85d04;color:#fff;text-decoration:none}
+.btn-green{background:#eaf3de;color:#3b6d11}
+.btn-outline{background:transparent;color:#666660;border:1px solid rgba(0,0,0,0.22)}
+.btn-sm{padding:10px 16px;font-size:14px;width:auto;display:inline-block}
+.scanning{background:#e6f1fb;border:1px solid #185fa5;border-radius:8px;padding:14px;display:-ms-flexbox;display:flex;-ms-flex-align:center;align-items:center;gap:12px;margin-top:10px}
+.pulse{width:12px;height:12px;border-radius:50%;background:#185fa5;-webkit-animation:pu 1s ease-in-out infinite;animation:pu 1s ease-in-out infinite;-ms-flex-negative:0;flex-shrink:0}
+@-webkit-keyframes pu{0%,100%{opacity:1;-webkit-transform:scale(1);transform:scale(1)}50%{opacity:.4;-webkit-transform:scale(.7);transform:scale(.7)}}
+@keyframes pu{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+.banner{background:#2A75BB;border-radius:12px;padding:14px 16px;margin-bottom:12px}
+.banner-name{color:#fff;font-size:19px;font-weight:600}
+.banner-sub{color:rgba(255,255,255,0.75);font-size:12px;margin-top:3px}
+.banner-badges{margin-top:10px}
+.badge{display:inline-block;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:500;margin-right:6px;margin-bottom:4px}
+.badge-secret{background:#FAEEDA;color:#633806}
+.badge-ultra{background:#CECBF6;color:#3C3489}
+.badge-rare{background:#B5D4F4;color:#0C447C}
+.badge-uncommon{background:#C0DD97;color:#27500A}
+.badge-common{background:rgba(255,255,255,0.2);color:#fff}
+.badge-special{background:#F4C0D1;color:#72243E}
+.badge-conf{background:rgba(255,255,255,0.15);color:#fff}
+.price-grid{display:-ms-flexbox;display:flex;gap:8px;margin-bottom:12px}
+.ptile{-ms-flex:1;flex:1;background:#f5f5f3;border-radius:8px;padding:12px;text-align:center}
+.ptile.hl{background:#eaf3de}
+.pt-label{font-size:10px;color:#666660;font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
+.ptile.hl .pt-label{color:#3b6d11}
+.pt-val{font-size:16px;font-weight:600}
+.ptile.hl .pt-val{color:#3b6d11}
+.pt-src{font-size:10px;color:#999993;margin-top:2px}
+.live-tag{background:#e1f5ee;color:#0f6e56;padding:2px 6px;border-radius:8px;font-size:10px;font-weight:600}
+.ai-tag{background:#eeedfe;color:#534ab7;padding:2px 6px;border-radius:8px;font-size:10px;font-weight:600}
+.section-title{font-size:13px;font-weight:600;color:#666660;margin-bottom:10px}
+.grade-tabs{margin-bottom:12px}
+.gtab{display:inline-block;padding:6px 16px;font-size:13px;font-weight:500;border-radius:20px;border:1px solid rgba(0,0,0,0.22);background:transparent;cursor:pointer;color:#666660;margin-right:6px}
+.gtab.active{background:#e6f1fb;color:#185fa5;border-color:#185fa5}
+.grade-table{width:100%;border-collapse:collapse;font-size:13px}
+.grade-table th{font-size:10px;font-weight:600;color:#999993;padding:6px 8px;border-bottom:1px solid rgba(0,0,0,0.1);text-align:left;text-transform:uppercase}
+.grade-table td{padding:10px 8px;border-bottom:1px solid rgba(0,0,0,0.08);vertical-align:middle}
+.grade-table tr:last-child td{border-bottom:none}
+.gnum{display:inline-block;width:36px;height:36px;border-radius:8px;text-align:center;line-height:36px;font-size:13px;font-weight:600}
+.g10{background:#FAEEDA;color:#633806}
+.g9{background:#CECBF6;color:#3C3489}
+.g8{background:#C0DD97;color:#27500A}
+.gx{background:#f5f5f3;color:#666660}
+.mult{font-size:11px;color:#3b6d11;font-weight:600}
+.insight{background:#faeeda;border:1px solid #854f0b;border-radius:8px;padding:12px 14px;font-size:13px;color:#854f0b;line-height:1.6;margin-top:10px}
+.err{background:#fcebeb;border:1px solid #a32d2d;border-radius:8px;padding:14px;font-size:13px;color:#a32d2d;margin-top:10px;line-height:1.5}
+.roi-good{color:#3b6d11;font-weight:600}
+.roi-ok{color:#854f0b;font-weight:600}
+.roi-bad{color:#a32d2d;font-weight:600}
+.stats-row{display:-ms-flexbox;display:flex;gap:8px;margin-bottom:12px}
+.stat-tile{-ms-flex:1;flex:1;background:#fff;border-radius:8px;padding:12px;border:1px solid rgba(0,0,0,0.1)}
+.sl{font-size:11px;color:#666660;margin-bottom:4px}
+.sv{font-size:20px;font-weight:600}
+.coll-item{background:#fff;border-radius:12px;padding:12px;margin-bottom:10px;display:-ms-flexbox;display:flex;-ms-flex-align:center;align-items:center;gap:12px;border:1px solid rgba(0,0,0,0.1)}
+.coll-thumb{width:50px;height:70px;object-fit:contain;border-radius:8px;background:#f5f5f3;-ms-flex-negative:0;flex-shrink:0}
+.coll-ph{width:50px;height:70px;border-radius:8px;background:#f5f5f3;display:-ms-flexbox;display:flex;-ms-flex-align:center;align-items:center;justify-content:center;-ms-flex-negative:0;flex-shrink:0;color:#999993;font-size:22px}
+.coll-info{-ms-flex:1;flex:1;min-width:0}
+.coll-name{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.coll-sub{font-size:12px;color:#666660;margin-top:2px}
+.coll-val{text-align:right;-ms-flex-negative:0;flex-shrink:0}
+.coll-nm{font-size:15px;font-weight:600;color:#3b6d11}
+.coll-graded{font-size:11px;color:#666660;margin-top:2px}
+.del-btn{background:transparent;border:none;padding:6px;cursor:pointer;color:#999993;border-radius:8px;display:block;margin-left:auto;margin-top:4px;font-size:18px;line-height:1}
+.empty{text-align:center;padding:48px 16px;color:#999993}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:13px;font-weight:500;color:#666660;margin-bottom:6px}
+.field input{width:100%;padding:12px 14px;border:1px solid rgba(0,0,0,0.22);border-radius:8px;font-size:15px;background:#fff;color:#1a1a1a}
+.note{background:#e6f1fb;border-radius:8px;padding:12px 14px;font-size:13px;color:#185fa5;line-height:1.6;margin-bottom:14px}
+.note a{color:#2A75BB}
+.footer-note{font-size:11px;color:#999993;text-align:center;line-height:1.5;margin-top:12px;padding:0 4px}
+.proxy-status{font-size:13px;margin-top:8px;padding:8px 12px;border-radius:8px;display:none}
+.proxy-ok{background:#eaf3de;color:#3b6d11}
+.proxy-fail{background:#fcebeb;color:#a32d2d}
+.step-row{display:-ms-flexbox;display:flex;-ms-flex-align:flex-start;align-items:flex-start;margin-bottom:14px;font-size:13px;color:#666660;line-height:1.6}
+.step-num{display:inline-block;width:22px;height:22px;border-radius:50%;background:#2A75BB;color:#fff;font-size:12px;font-weight:600;text-align:center;line-height:22px;-ms-flex-negative:0;flex-shrink:0;margin-right:10px;margin-top:1px}
+code{background:#f5f5f3;padding:2px 6px;border-radius:4px;font-size:12px;font-family:Consolas,monospace;color:#1a1a1a}
+.code-block{background:#f5f5f3;border-radius:8px;padding:12px;font-family:Consolas,monospace;font-size:11px;color:#1a1a1a;line-height:1.6;white-space:pre-wrap;word-break:break-all;border:1px solid rgba(0,0,0,0.1);max-height:220px;overflow-y:auto}
+video{width:100%;border-radius:12px;display:none}
+canvas{display:none}
+a{color:#2A75BB}
+.warn-box{background:#faeeda;border:1px solid #854f0b;border-radius:8px;padding:12px 14px;font-size:13px;color:#854f0b;margin-bottom:12px;line-height:1.5;display:none}
+.two-col{display:-ms-flexbox;display:flex;gap:8px}
+.two-col .col{-ms-flex:1;flex:1;background:#f5f5f3;border-radius:8px;padding:10px 12px}
+.col-label{font-size:11px;color:#666660;margin-bottom:3px}
+.col-val{font-weight:600;font-size:14px}
+</style>
+</head>
+<body>
+<div class="app">
+
+<div class="header">
+  <div class="poke-ball">
+    <svg width="24" height="24" viewBox="0 0 100 100" fill="none">
+      <circle cx="50" cy="50" r="46" fill="#FFCB05"/>
+      <rect x="2" y="45" width="96" height="10" fill="#2A75BB"/>
+      <circle cx="50" cy="50" r="14" fill="white" stroke="#2A75BB" stroke-width="4"/>
+      <circle cx="50" cy="50" r="6" fill="#FFCB05"/>
+    </svg>
+  </div>
+  <div>
+    <div class="header-title">PokeScan Pro</div>
+    <div class="header-sub">Card price checker &amp; collection tracker</div>
+  </div>
+</div>
+
+<div class="tab-bar">
+  <button class="tab active" id="tab-scan" onclick="showTab('scan')">Scan</button>
+  <button class="tab" id="tab-coll" onclick="showTab('coll')">Collection <span id="badge" style="display:none;background:#2A75BB;color:white;border-radius:10px;padding:1px 6px;font-size:10px;margin-left:2px">0</span></button>
+  <button class="tab" id="tab-settings" onclick="showTab('settings')">Settings</button>
+</div>
+
+<!-- SCAN -->
+<div class="view active" id="view-scan">
+  <video id="videoEl" autoplay playsinline></video>
+  <canvas id="canvasEl"></canvas>
+  <div id="capture-step">
+    <div class="warn-box" id="no-proxy-warn">
+      <strong>Setup needed.</strong> Go to <strong>Settings</strong> tab and complete the 5-step Cloudflare Worker setup to enable scanning.
+    </div>
+    <div class="cam-zone" id="cam-zone" onclick="handleCamTap()">
+      <div class="cam-icon">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#185fa5" stroke-width="1.5">
+          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+          <circle cx="12" cy="13" r="4"/>
+        </svg>
+      </div>
+      <div class="cam-title">Photograph a Pokemon card</div>
+      <div class="cam-sub">Any card — vintage, modern, holo, full art, promo</div>
+    </div>
+    <input type="file" id="file-in" accept="image/*" capture="environment" style="display:none" onchange="handleFile(event)"/>
+    <button class="btn btn-outline" onclick="handleUploadTap()" style="margin-top:0;">Upload from photo library</button>
+    <div id="cam-ctrl" style="display:none;margin-top:8px;">
+      <button class="btn btn-blue" onclick="capPhoto()">Take photo</button>
+      <button class="btn btn-outline" onclick="stopCam()" style="margin-top:6px;">Cancel</button>
+    </div>
+  </div>
+  <div id="preview-step" style="display:none;">
+    <div class="card">
+      <img id="prev-img" class="prev-img" alt="Card photo"/>
+      <div id="scan-status"></div>
+      <button class="btn btn-blue" id="scan-btn" onclick="scanCard()">Identify card &amp; get prices</button>
+      <button class="btn btn-outline" onclick="resetCapture()" style="margin-top:6px;">Retake / different card</button>
+    </div>
+  </div>
+  <div id="results-step" style="display:none;"></div>
+</div>
+
+<!-- COLLECTION -->
+<div class="view" id="view-coll">
+  <div class="stats-row" id="coll-stats"></div>
+  <div id="coll-list"></div>
+</div>
+
+<!-- SETTINGS -->
+<div class="view" id="view-settings">
+  <div class="card">
+    <div class="section-title">Cloudflare Worker proxy — required</div>
+    <div class="note">Browsers block direct AI API calls for security. A free Cloudflare Worker acts as a secure middleman. Takes about 3 minutes. Follow the steps below.</div>
+    <div class="field">
+      <label>Worker proxy URL</label>
+      <input type="url" id="proxy-input" placeholder="https://pokescan-proxy.YOUR-NAME.workers.dev"/>
+    </div>
+    <button class="btn btn-blue btn-sm" onclick="saveProxy()">Save &amp; test connection</button>
+    <div id="proxy-status" class="proxy-status"></div>
+  </div>
+
+  <div class="card">
+    <div class="section-title">Setup guide — 5 steps</div>
+    <div class="step-row"><span class="step-num">1</span><div>Go to <a href="https://dash.cloudflare.com/sign-up" target="_blank">dash.cloudflare.com/sign-up</a> and create a free account. No credit card needed.</div></div>
+    <div class="step-row"><span class="step-num">2</span><div><strong>Workers &amp; Pages</strong> &rarr; <strong>Create</strong> &rarr; <strong>Create Worker</strong> &rarr; name it <code>pokescan-proxy</code> &rarr; <strong>Deploy</strong></div></div>
+    <div class="step-row"><span class="step-num">3</span><div>Click <strong>Edit code</strong>, select all, delete it, paste the worker code below, then click <strong>Deploy</strong></div></div>
+    <div class="step-row"><span class="step-num">4</span><div>Worker <strong>Settings &rarr; Variables &amp; Secrets &rarr; Add</strong> &rarr; name: <code>ANTHROPIC_API_KEY</code> &rarr; paste your key from <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> &rarr; click <strong>Encrypt</strong> &rarr; <strong>Save</strong></div></div>
+    <div class="step-row"><span class="step-num">5</span><div>Copy your Worker URL (looks like <code>pokescan-proxy.xyz.workers.dev</code>) and paste it in the field above</div></div>
+    <div style="margin-top:8px;">
+      <div style="font-size:12px;font-weight:600;color:#666660;margin-bottom:8px;">Worker code — paste in step 3:</div>
+      <div class="code-block" id="worker-code-block">export default {
+  async fetch(request, env) {
+    if (request.method === 'OPTIONS') {
+      return new Response(null, {
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'POST, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type',
+        },
+      });
+    }
+    const body = await request.json();
+    const response = await fetch(
+      'https://api.anthropic.com/v1/messages',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': env.ANTHROPIC_API_KEY,
+          'anthropic-version': '2023-06-01',
+        },
+        body: JSON.stringify(body),
+      }
+    );
+    const data = await response.json();
+    return new Response(JSON.stringify(data), {
+      status: response.status,
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+      },
+    });
+  },
+};</div>
+      <button class="btn btn-outline btn-sm" id="copy-btn" onclick="copyCode()" style="margin-top:8px;">Copy worker code</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-title">Live pricing — optional</div>
+    <div class="note">Free <a href="https://poketrace.com" target="_blank">PokeTrace</a> API key gives live TCGPlayer and eBay prices (250 requests/day free). Without it the app uses AI price estimates.</div>
+    <div class="field">
+      <label>PokeTrace API key (optional)</label>
+      <input type="password" id="api-input" placeholder="Paste PokeTrace key here"/>
+    </div>
+    <button class="btn btn-blue btn-sm" onclick="saveApiKey()">Save</button>
+    <div id="key-status" style="font-size:13px;color:#666660;margin-top:8px;"></div>
+  </div>
+
+  <div class="card">
+    <div class="section-title">Collection</div>
+    <p style="font-size:13px;color:#666660;margin-bottom:12px;line-height:1.5;">You have <strong id="sc">0</strong> cards saved this session.</p>
+    <button class="btn btn-outline btn-sm" style="color:#a32d2d;border-color:#a32d2d;" onclick="clearAll()">Clear all cards</button>
+  </div>
+</div>
+
+</div>
+
+<script>
+// ES5 compatible - no arrow functions, no template literals, no const/let, no async/await
+var camStream = null;
+var imgB64 = null;
+var imgUrl = null;
+var currentCard = null;
+var collection = [];
+var apiKey = '';
+var proxyUrl = '';
+var activeGrader = 'PSA';
+
+function showTab(t) {
+  var tabs = ['scan', 'coll', 'settings'];
+  for (var i = 0; i < tabs.length; i++) {
+    var x = tabs[i];
+    var view = document.getElementById('view-' + x);
+    var tab = document.getElementById('tab-' + x);
+    if (x === t) {
+      view.className = 'view active';
+      tab.className = 'tab active';
+    } else {
+      view.className = 'view';
+      tab.className = 'tab';
+    }
+  }
+  if (t === 'coll') renderColl();
+  if (t === 'settings') {
+    document.getElementById('proxy-input').value = proxyUrl;
+    document.getElementById('api-input').value = apiKey;
+    document.getElementById('sc').textContent = collection.length;
+  }
+  if (t === 'scan') checkWarn();
+}
+
+function checkWarn() {
+  document.getElementById('no-proxy-warn').style.display = proxyUrl ? 'none' : 'block';
+}
+
+function saveProxy() {
+  var url = document.getElementById('proxy-input').value.replace(/\/$/, '').trim();
+  var st = document.getElementById('proxy-status');
+  st.className = 'proxy-status proxy-ok';
+  st.style.display = 'block';
+  st.textContent = 'Testing connection...';
+
+  var xhr = new XMLHttpRequest();
+  xhr.open('POST', url, true);
+  xhr.setRequestHeader('Content-Type', 'application/json');
+  xhr.timeout = 10000;
+  xhr.onreadystatechange = function() {
+    if (xhr.readyState === 4) {
+      if (xhr.status === 200 || xhr.status === 400 || xhr.status === 529) {
+        proxyUrl = url;
+        st.className = 'proxy-status proxy-ok';
+        st.textContent = 'Connected! Proxy is working.';
+        checkWarn();
+      } else if (xhr.status === 0) {
+        st.className = 'proxy-status proxy-fail';
+        st.textContent = 'Could not reach that URL. Double-check the Worker URL and try again.';
+      } else {
+        st.className = 'proxy-status proxy-fail';
+        st.textContent = 'Error ' + xhr.status + ' - Check Worker code and API key in step 4.';
+      }
+    }
+  };
+  xhr.onerror = function() {
+    st.className = 'proxy-status proxy-fail';
+    st.textContent = 'Network error. Check the Worker URL is correct.';
+  };
+  xhr.ontimeout = function() {
+    st.className = 'proxy-status proxy-fail';
+    st.textContent = 'Request timed out. Check the Worker URL.';
+  };
+  xhr.send(JSON.stringify({
+    model: 'claude-haiku-4-5-20251001',
+    max_tokens: 10,
+    messages: [{ role: 'user', content: 'hi' }]
+  }));
+}
+
+function copyCode() {
+  var code = document.getElementById('worker-code-block').textContent;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(code).then(function() {
+      document.getElementById('copy-btn').textContent = 'Copied!';
+      setTimeout(function() {
+        document.getElementById('copy-btn').textContent = 'Copy worker code';
+      }, 2000);
+    });
+  } else {
+    // Fallback for older browsers
+    var ta = document.createElement('textarea');
+    ta.value = code;
+    ta.style.position = 'fixed';
+    ta.style.top = '0';
+    ta.style.left = '0';
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    try {
+      document.execCommand('copy');
+      document.getElementById('copy-btn').textContent = 'Copied!';
+      setTimeout(function() {
+        document.getElementById('copy-btn').textContent = 'Copy worker code';
+      }, 2000);
+    } catch (e) {
+      alert('Please long-press the code block and copy manually.');
+    }
+    document.body.removeChild(ta);
+  }
+}
+
+function saveApiKey() {
+  apiKey = document.getElementById('api-input').value.trim();
+  var s = document.getElementById('key-status');
+  if (apiKey) {
+    s.textContent = 'Saved - live prices enabled!';
+    s.style.color = '#3b6d11';
+  } else {
+    s.textContent = 'No key - using AI estimates.';
+    s.style.color = '#666660';
+  }
+}
+
+function handleCamTap() {
+  if (!proxyUrl) { showTab('settings'); return; }
+  startCam();
+}
+
+function handleUploadTap() {
+  if (!proxyUrl) { showTab('settings'); return; }
+  document.getElementById('file-in').click();
+}
+
+function startCam() {
+  document.getElementById('cam-zone').style.display = 'none';
+  document.getElementById('videoEl').style.display = 'block';
+  document.getElementById('cam-ctrl').style.display = 'block';
+  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+      .then(function(s) {
+        camStream = s;
+        document.getElementById('videoEl').srcObject = s;
+      })
+      .catch(function() {
+        stopCam();
+        document.getElementById('cam-zone').style.display = 'block';
+        document.getElementById('file-in').click();
+      });
+  } else {
+    stopCam();
+    document.getElementById('cam-zone').style.display = 'block';
+    document.getElementById('file-in').click();
+  }
+}
+
+function stopCam() {
+  if (camStream) {
+    var tracks = camStream.getTracks();
+    for (var i = 0; i < tracks.length; i++) tracks[i].stop();
+    camStream = null;
+  }
+  document.getElementById('videoEl').style.display = 'none';
+  document.getElementById('cam-ctrl').style.display = 'none';
+  document.getElementById('cam-zone').style.display = 'block';
+}
+
+function capPhoto() {
+  var v = document.getElementById('videoEl');
+  var c = document.getElementById('canvasEl');
+  c.width = v.videoWidth || 1280;
+  c.height = v.videoHeight || 720;
+  c.getContext('2d').drawImage(v, 0, 0);
+  var url = c.toDataURL('image/jpeg', 0.9);
+  imgB64 = url.split(',')[1];
+  imgUrl = url;
+  document.getElementById('prev-img').src = url;
+  stopCam();
+  document.getElementById('capture-step').style.display = 'none';
+  document.getElementById('preview-step').style.display = 'block';
+}
+
+function handleFile(e) {
+  var f = e.target.files[0];
+  if (!f) return;
+  var reader = new FileReader();
+  reader.onload = function(ev) {
+    imgB64 = ev.target.result.split(',')[1];
+    imgUrl = ev.target.result;
+    document.getElementById('prev-img').src = ev.target.result;
+    document.getElementById('capture-step').style.display = 'none';
+    document.getElementById('preview-step').style.display = 'block';
+  };
+  reader.readAsDataURL(f);
+}
+
+function resetCapture() {
+  imgB64 = null; imgUrl = null; currentCard = null;
+  document.getElementById('preview-step').style.display = 'none';
+  document.getElementById('results-step').style.display = 'none';
+  document.getElementById('results-step').innerHTML = '';
+  document.getElementById('scan-status').innerHTML = '';
+  document.getElementById('capture-step').style.display = 'block';
+  document.getElementById('cam-zone').style.display = 'block';
+  document.getElementById('file-in').value = '';
+}
+
+function fmt(n) {
+  if (!n || n === 0) return 'N/A';
+  return '$' + Number(n).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}
+
+function calcMult(base, val) {
+  if (!base || !val || base === 0) return '';
+  return (val / base).toFixed(1) + 'x';
+}
+
+function scanCard() {
+  if (!imgB64 || !proxyUrl) return;
+  var btn = document.getElementById('scan-btn');
+  btn.disabled = true;
+  document.getElementById('scan-status').innerHTML =
+    '<div class="scanning"><div class="pulse"></div><span style="font-size:14px;color:#185fa5;">Identifying card and getting prices...</span></div>';
+
+  var payload = JSON.stringify({
+    model: 'claude-sonnet-4-20250514',
+    max_tokens: 1000,
+    messages: [{
+      role: 'user',
+      content: [
+        { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: imgB64 } },
+        { type: 'text', text: 'Identify this Pokemon card precisely. Provide realistic 2026 market prices. Return ONLY JSON, no markdown:\n{"name":"Pokemon name","fullName":"Full card name with ex/V/VMAX/GX suffix","set":"Set name","setCode":"code","number":"card number","year":"year","rarity":"Common|Uncommon|Rare|Holo Rare|Ultra Rare|Secret Rare|Special Illustration Rare|Hyper Rare|Promo","variant":"1st Edition|Shadowless|Reverse Holo|Full Art|Alt Art|null","isHolo":true,"confidence":"high|medium|low","ungraded":{"poorFair":0,"good":0,"nearMint":0},"graded":{"PSA":{"psa10":0,"psa9":0,"psa8":0,"psa7":0},"CGC":{"cgc10":0,"cgc95":0,"cgc9":0,"cgc85":0},"BGS":{"bgs10":0,"bgs95":0,"bgs9":0,"bgs85":0}},"gradingAdvice":"1-2 sentences","marketNote":"1 sentence"}' }
+      ]
+    }]
+  });
+
+  var xhr = new XMLHttpRequest();
+  xhr.open('POST', proxyUrl, true);
+  xhr.setRequestHeader('Content-Type', 'application/json');
+  xhr.timeout = 30000;
+  xhr.onreadystatechange = function() {
+    if (xhr.readyState !== 4) return;
+    btn.disabled = false;
+    if (xhr.status !== 200) {
+      document.getElementById('scan-status').innerHTML =
+        '<div class="err">Proxy error ' + xhr.status + '. Check your Worker URL and API key in Settings.</div>';
+      return;
+    }
+    var data;
+    try { data = JSON.parse(xhr.responseText); } catch(e) {
+      document.getElementById('scan-status').innerHTML = '<div class="err">Invalid response from proxy. Check Worker setup.</div>';
+      return;
+    }
+    var txt = '';
+    if (data.content) {
+      for (var i = 0; i < data.content.length; i++) {
+        if (data.content[i].type === 'text') { txt = data.content[i].text; break; }
+      }
+    }
+    var card;
+    try {
+      txt = txt.replace(/```json/g, '').replace(/```/g, '').trim();
+      card = JSON.parse(txt);
+    } catch(e) {
+      document.getElementById('scan-status').innerHTML =
+        '<div class="err">Could not identify card. Make sure it is fully visible and well-lit, then try again.</div>';
+      return;
+    }
+    currentCard = card;
+    document.getElementById('scan-status').innerHTML = '';
+    if (apiKey) {
+      fetchLive(card.fullName || card.name, card.set, card);
+    } else {
+      renderResults(card);
+    }
+  };
+  xhr.onerror = function() {
+    btn.disabled = false;
+    document.getElementById('scan-status').innerHTML =
+      '<div class="err">Connection error. Check your Worker URL in Settings is correct.</div>';
+  };
+  xhr.ontimeout = function() {
+    btn.disabled = false;
+    document.getElementById('scan-status').innerHTML =
+      '<div class="err">Request timed out. Check your internet connection and Worker URL.</div>';
+  };
+  xhr.send(payload);
+}
+
+function fetchLive(name, set, card) {
+  var q = encodeURIComponent(name + (set ? ' ' + set : ''));
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', 'https://api.poketrace.com/v1/cards?search=' + q + '&market=US&limit=3', true);
+  xhr.setRequestHeader('X-API-Key', apiKey);
+  xhr.timeout = 8000;
+  xhr.onreadystatechange = function() {
+    if (xhr.readyState !== 4) return;
+    if (xhr.status === 200) {
+      var data;
+      try { data = JSON.parse(xhr.responseText); } catch(e) { renderResults(card); return; }
+      var cards = data.data || [];
+      if (cards.length > 0) {
+        var c = cards[0];
+        var t = c.prices && c.prices.tcgplayer;
+        var eb = c.prices && c.prices.ebay;
+        if (t && t.NEAR_MINT) card._liveNM = t.NEAR_MINT.avg || null;
+        if (t && t.NEAR_MINT) card._liveLow = t.NEAR_MINT.low || null;
+        if (t && t.NEAR_MINT) card._liveHigh = t.NEAR_MINT.high || null;
+        if (eb && eb.NEAR_MINT) card._ebayNM = eb.NEAR_MINT.avg || null;
+        if (card._liveNM) card._live = true;
+      }
+      renderResults(card);
+    } else {
+      renderResults(card);
+    }
+  };
+  xhr.onerror = function() { renderResults(card); };
+  xhr.ontimeout = function() { renderResults(card); };
+  xhr.send();
+}
+
+function rarityBadge(r) {
+  if (!r) return 'badge-common';
+  var l = r.toLowerCase();
+  if (l.indexOf('secret') > -1 || l.indexOf('hyper') > -1) return 'badge-secret';
+  if (l.indexOf('special') > -1 || l.indexOf('alt') > -1) return 'badge-special';
+  if (l.indexOf('ultra') > -1 || l.indexOf('full art') > -1) return 'badge-ultra';
+  if (l.indexOf('holo') > -1 || l.indexOf('rare') > -1) return 'badge-rare';
+  if (l.indexOf('uncommon') > -1) return 'badge-uncommon';
+  return 'badge-common';
+}
+
+function renderResults(card) {
+  var nm = (card._liveNM) || (card.ungraded && card.ungraded.nearMint) || 0;
+  var liveTag = card._live ? '<span class="live-tag">LIVE</span>' : '<span class="ai-tag">AI</span>';
+  var liveSection = '';
+  if (card._live) {
+    liveSection = '<div class="two-col" style="margin-top:8px;">' +
+      '<div class="col"><div class="col-label">TCGPlayer range</div><div class="col-val">' + fmt(card._liveLow) + ' - ' + fmt(card._liveHigh) + '</div></div>' +
+      '<div class="col"><div class="col-label">eBay sold NM avg</div><div class="col-val">' + (card._ebayNM ? fmt(card._ebayNM) : '-') + '</div></div></div>';
+  }
+  var marketNote = card.marketNote ? '<p style="font-size:12px;color:#666660;margin-top:10px;padding-top:10px;border-top:1px solid rgba(0,0,0,0.08);line-height:1.5;">' + card.marketNote + '</p>' : '';
+  var insight = card.gradingAdvice ? '<div class="insight">' + card.gradingAdvice + '</div>' : '';
+  var variantStr = card.variant && card.variant !== 'null' ? ' &middot; ' + card.variant : '';
+  var poorFair = card.ungraded ? card.ungraded.poorFair : 0;
+  var good = card.ungraded ? card.ungraded.good : 0;
+
+  var html = '<div class="banner">' +
+    '<div class="banner-name">' + (card.fullName || card.name) + '</div>' +
+    '<div class="banner-sub">' + card.set + (card.number ? ' &middot; #' + card.number : '') + (card.year ? ' &middot; ' + card.year : '') + variantStr + '</div>' +
+    '<div class="banner-badges">' +
+    '<span class="badge ' + rarityBadge(card.rarity) + '">' + (card.rarity || 'Unknown') + '</span>' +
+    '<span class="badge badge-conf">' + card.confidence + ' confidence</span>' +
+    '</div></div>' +
+    '<div class="card">' +
+    '<div class="section-title">Ungraded (raw) prices ' + liveTag + '</div>' +
+    '<div class="price-grid">' +
+    '<div class="ptile"><div class="pt-label">Poor/Fair</div><div class="pt-val">' + fmt(poorFair) + '</div><div class="pt-src">AI est.</div></div>' +
+    '<div class="ptile"><div class="pt-label">Lightly played</div><div class="pt-val">' + fmt(good) + '</div><div class="pt-src">AI est.</div></div>' +
+    '<div class="ptile hl"><div class="pt-label">Near mint</div><div class="pt-val">' + fmt(nm) + '</div><div class="pt-src">' + (card._live ? 'TCGPlayer live' : 'AI est.') + '</div></div>' +
+    '</div>' + liveSection + marketNote + '</div>' +
+    '<div class="card"><div class="section-title">Graded prices <span class="ai-tag">AI est.</span></div>' +
+    '<div class="grade-tabs" id="gtabs">' +
+    '<button class="gtab active" onclick="switchGrader(\'PSA\',this)">PSA</button>' +
+    '<button class="gtab" onclick="switchGrader(\'CGC\',this)">CGC</button>' +
+    '<button class="gtab" onclick="switchGrader(\'BGS\',this)">BGS</button>' +
+    '</div><div id="grade-area"></div>' + insight + '</div>' +
+    '<div class="card"><div class="section-title">Grading ROI calculator</div>' +
+    '<table class="grade-table"><thead><tr><th>Service</th><th>Fee</th><th>PSA 10</th><th>Gain</th><th>Worth it?</th></tr></thead>' +
+    '<tbody id="roi-body"></tbody></table></div>' +
+    '<div style="display:-ms-flexbox;display:flex;gap:8px;margin-bottom:8px;">' +
+    '<button class="btn btn-green" onclick="addToCollection()" id="add-btn" style="-ms-flex:1;flex:1;margin-top:0;">+ Add to collection</button>' +
+    '<button class="btn btn-outline" onclick="resetCapture()" style="-ms-flex:1;flex:1;margin-top:0;">Scan again</button>' +
+    '</div>' +
+    '<a href="https://www.tcgplayer.com/search/pokemon/product?q=' + encodeURIComponent((card.fullName || card.name) + ' ' + card.set) + '" target="_blank" style="text-decoration:none;display:block;">' +
+    '<button class="btn btn-orange">View on TCGPlayer</button></a>' +
+    '<div class="footer-note">Graded values are AI estimates. Verify at poketrace.com before buying or selling.</div>';
+
+  var el = document.getElementById('results-step');
+  el.innerHTML = html;
+  el.style.display = 'block';
+  renderGradeTable('PSA');
+  renderROI();
+  setTimeout(function() { el.scrollIntoView(true); }, 200);
+}
+
+function renderGradeTable(grader) {
+  var c = currentCard;
+  if (!c || !c.graded) return;
+  var g = c.graded[grader] || {};
+  var nm = (c._liveNM) || (c.ungraded && c.ungraded.nearMint) || 0;
+  var grades;
+  if (grader === 'PSA') {
+    grades = [['10','Gem Mint',g.psa10],['9','Mint',g.psa9],['8','NM-Mint',g.psa8],['7','Near Mint',g.psa7]];
+  } else if (grader === 'CGC') {
+    grades = [['10','Pristine',g.cgc10],['9.5','Gem Mint',g.cgc95],['9','Mint',g.cgc9],['8.5','NM+',g.cgc85]];
+  } else {
+    grades = [['10','Pristine',g.bgs10],['9.5','Gem Mint',g.bgs95],['9','Mint',g.bgs9],['8.5','NM+',g.bgs85]];
+  }
+  var rows = '';
+  for (var i = 0; i < grades.length; i++) {
+    var gr = grades[i][0]; var label = grades[i][1]; var val = grades[i][2];
+    var cls = gr === '10' ? 'g10' : (gr === '9' || gr === '9.5') ? 'g9' : (gr === '8' || gr === '8.5') ? 'g8' : 'gx';
+    var m = (val && nm) ? '<span class="mult">' + calcMult(nm, val) + '</span>' : '';
+    rows += '<tr><td><span class="gnum ' + cls + '">' + gr + '</span></td><td style="font-weight:600;">' + fmt(val) + '</td><td style="font-size:12px;color:#666660;">' + label + '</td><td>' + m + '</td></tr>';
+  }
+  var el = document.getElementById('grade-area');
+  if (el) el.innerHTML = '<table class="grade-table"><thead><tr><th>Grade</th><th>Est. value</th><th>Label</th><th>vs NM</th></tr></thead><tbody>' + rows + '</tbody></table>';
+}
+
+function switchGrader(g, btn) {
+  activeGrader = g;
+  var tabs = document.querySelectorAll('.gtab');
+  for (var i = 0; i < tabs.length; i++) tabs[i].className = 'gtab';
+  btn.className = 'gtab active';
+  renderGradeTable(g);
+}
+
+function renderROI() {
+  var c = currentCard;
+  if (!c) return;
+  var nm = (c._liveNM) || (c.ungraded && c.ungraded.nearMint) || 0;
+  var p10 = c.graded && c.graded.PSA ? c.graded.PSA.psa10 : 0;
+  var el = document.getElementById('roi-body');
+  if (!el) return;
+  var tiers = [['PSA Economy',25],['PSA Regular',50],['PSA Express',150],['CGC Economy',18],['CGC Express',65]];
+  var rows = '';
+  for (var i = 0; i < tiers.length; i++) {
+    var name = tiers[i][0]; var cost = tiers[i][1];
+    if (!p10 || !nm) {
+      rows += '<tr><td colspan="5" style="font-size:12px;color:#999993;padding:10px;">Need price data for calculation.</td></tr>';
+      break;
+    }
+    var gain = p10 - nm - cost;
+    var cls = gain > nm * 0.5 ? 'roi-good' : (gain > 0 ? 'roi-ok' : 'roi-bad');
+    var verdict = gain > nm ? 'Strong yes' : (gain > 0 ? 'Maybe' : 'No');
+    rows += '<tr><td style="font-weight:500;">' + name + '</td><td style="color:#666660;">$' + cost + '</td><td>' + fmt(p10) + '</td><td class="' + cls + '">' + (gain > 0 ? '+' : '') + fmt(gain) + '</td><td class="' + cls + '" style="font-size:12px;">' + verdict + '</td></tr>';
+  }
+  el.innerHTML = rows;
+}
+
+function addToCollection() {
+  if (!currentCard) return;
+  var c = currentCard;
+  var entry = {
+    id: Date.now(),
+    name: c.fullName || c.name,
+    set: c.set,
+    number: c.number,
+    rarity: c.rarity,
+    variant: c.variant,
+    nmPrice: (c._liveNM) || (c.ungraded ? c.ungraded.nearMint : 0) || 0,
+    psa10: (c.graded && c.graded.PSA) ? c.graded.PSA.psa10 : 0,
+    imgUrl: imgUrl,
+    live: !!c._live,
+    added: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+  };
+  collection.push(entry);
+  updateBadge();
+  var btn = document.getElementById('add-btn');
+  if (btn) { btn.textContent = 'Added!'; btn.style.background = '#f5f5f3'; btn.style.color = '#666660'; btn.disabled = true; }
+}
+
+function updateBadge() {
+  var b = document.getElementById('badge');
+  b.textContent = collection.length;
+  b.style.display = collection.length ? 'inline' : 'none';
+}
+
+function renderColl() {
+  var stats = document.getElementById('coll-stats');
+  var list = document.getElementById('coll-list');
+  if (!collection.length) {
+    stats.innerHTML = '';
+    list.innerHTML = '<div class="empty"><div style="font-size:48px;margin-bottom:12px;">&#x1F0CF;</div><div style="font-size:15px;">No cards yet. Scan one and tap "Add to collection"</div></div>';
+    return;
+  }
+  var totalNM = 0; var totalG = 0;
+  for (var i = 0; i < collection.length; i++) {
+    totalNM += collection[i].nmPrice || 0;
+    totalG += collection[i].psa10 || 0;
+  }
+  stats.innerHTML =
+    '<div class="stat-tile"><div class="sl">Cards</div><div class="sv">' + collection.length + '</div></div>' +
+    '<div class="stat-tile"><div class="sl">Raw NM value</div><div class="sv" style="color:#3b6d11;">' + fmt(totalNM) + '</div></div>' +
+    '<div class="stat-tile"><div class="sl">PSA 10 est.</div><div class="sv" style="color:#185fa5;">' + (totalG ? fmt(totalG) : '-') + '</div></div>';
+
+  var html = '';
+  for (var j = 0; j < collection.length; j++) {
+    var c = collection[j];
+    var thumb = c.imgUrl ?
+      '<img class="coll-thumb" src="' + c.imgUrl + '" alt="' + c.name + '"/>' :
+      '<div class="coll-ph">&#x1F0CF;</div>';
+    var srcTag = c.live ? '<span class="live-tag">LIVE</span>' : '<span class="ai-tag">AI</span>';
+    html += '<div class="coll-item">' + thumb +
+      '<div class="coll-info">' +
+      '<div class="coll-name">' + c.name + '</div>' +
+      '<div class="coll-sub">' + c.set + (c.number ? ' &middot; #' + c.number : '') + '</div>' +
+      '<div class="coll-sub">' + (c.rarity || '') + (c.variant && c.variant !== 'null' ? ' &middot; ' + c.variant : '') + '</div>' +
+      '<div style="margin-top:4px;">' + srcTag + ' <span style="font-size:11px;color:#999993;">Added ' + c.added + '</span></div>' +
+      '</div>' +
+      '<div class="coll-val">' +
+      '<div class="coll-nm">' + fmt(c.nmPrice) + '</div>' +
+      '<div class="coll-graded">' + (c.psa10 ? 'PSA 10: ' + fmt(c.psa10) : '') + '</div>' +
+      '<button class="del-btn" onclick="removeCard(' + c.id + ')">&#x2715;</button>' +
+      '</div></div>';
+  }
+  list.innerHTML = html;
+}
+
+function removeCard(id) {
+  var newColl = [];
+  for (var i = 0; i < collection.length; i++) {
+    if (collection[i].id !== id) newColl.push(collection[i]);
+  }
+  collection = newColl;
+  updateBadge();
+  renderColl();
+}
+
+function clearAll() {
+  if (!confirm('Clear all ' + collection.length + ' cards?')) return;
+  collection = [];
+  updateBadge();
+  renderColl();
+  document.getElementById('sc').textContent = 0;
+}
+
+// Init
+checkWarn();
+</script>
+</body>
+</html>
